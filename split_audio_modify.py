@@ -42,6 +42,16 @@ def save_chunk(audio_file, t1, t2, filename_out):
         audio_chunk.export(filename_out, format='wav')
         if ARGS.verbose:
             print('Saved: '+filename_out)
+
+        # Convert the saved chunk to 16kHz mono using FFmpeg
+        audio_path_orig = filename_out
+        wav_path = os.path.splitext(filename_out)[0] + '_16k_mono.wav'
+        ffmpeg_command = f"ffmpeg -i {audio_path_orig} -ac 1 -ar 16000 {wav_path}"
+        subprocess.run(ffmpeg_command, shell=True, check=True)
+
+        if ARGS.verbose:
+            print(f'Converted to 16kHz mono: {wav_path}')
+            
     except Exception as e:
         print('Failed to save: '+filename_out)
         print(e)
