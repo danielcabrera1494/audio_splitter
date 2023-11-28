@@ -1,5 +1,6 @@
 import argparse
 import os
+import subprocess
 from pydub import AudioSegment
 
 # Get command line arguments
@@ -32,7 +33,10 @@ ARGS = parser.parse_args()
 def save_chunk(audio_file, t1, t2, filename_out):
     try:
         audio_chunk = audio_file[t1:t2]
+
+        # Save the chunk in the original format
         audio_chunk.export(filename_out, format='wav')
+
         if ARGS.verbose:
             print('Saved: '+filename_out)
 
@@ -44,7 +48,7 @@ def save_chunk(audio_file, t1, t2, filename_out):
 
         if ARGS.verbose:
             print(f'Converted to 16kHz mono: {wav_path}')
-            
+
     except Exception as e:
         print('Failed to save: '+filename_out)
         print(e)
@@ -75,14 +79,14 @@ def process_audio_file(input_file):
     prev_time = 0
     i = 0
 
-    # Save chunks
+    # Save and convert chunks
     for curr_time in range(ARGS.chunk_size, len(audio_file), ARGS.chunk_size):
         save_chunk(audio_file, prev_time, curr_time,
                    os.path.join(output_dir, '{}_{:04}.wav'.format(input_base_name, i)))
         prev_time = curr_time
         i += 1
 
-    # Save last chunk
+    # Save and convert last chunk
     if prev_time < len(audio_file):
         save_chunk(audio_file, prev_time, len(audio_file),
                    os.path.join(output_dir, '{}_{:04}.wav'.format(input_base_name, i)))
