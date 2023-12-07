@@ -31,6 +31,11 @@ parser.add_argument('-v', '--verbose',
 ARGS = parser.parse_args()
 
 def save_chunk(audio_file, t1, t2, filename_out):
+ 
+    if t2 - t1 < ARGS.chunk_size:
+        if ARGS.verbose:
+            print(f'Skipping short chunk: {filename_out}')
+        return
     try:
         audio_chunk = audio_file[t1:t2]
 
