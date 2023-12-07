@@ -37,25 +37,28 @@ def save_chunk(audio_file, t1, t2, filename_out):
             print(f'Skipping short chunk: {filename_out}')
         return
     try:
+        # Extract the audio chunk
         audio_chunk = audio_file[t1:t2]
 
-        # Save the chunk in the original format
-        audio_chunk.export(filename_out, format='wav')
+        # Prepare the file paths
+        audio_path_orig = os.path.splitext(filename_out)[0] + '_orig.wav'
+        wav_path = os.path.splitext(filename_out)[0] + '_16k_mono.wav'
 
-        if ARGS.verbose:
-            print('Saved: '+filename_out)
+        # Export the chunk in the original format temporarily
+        audio_chunk.export(audio_path_orig, format='wav')
 
         # Convert the saved chunk to 16kHz mono using FFmpeg
-        audio_path_orig = filename_out
-        wav_path = os.path.splitext(filename_out)[0] + '_16k_mono.wav'
         ffmpeg_command = f"ffmpeg -i {audio_path_orig} -ac 1 -ar 16000 {wav_path}"
         subprocess.run(ffmpeg_command, shell=True, check=True)
+
+        # Remove the temporary original format file
+        os.remove(audio_path_orig)
 
         if ARGS.verbose:
             print(f'Converted to 16kHz mono: {wav_path}')
 
     except Exception as e:
-        print('Failed to save: '+filename_out)
+        print('Failed to process: '+filename_out)
         print(e)
 
 def process_audio_file(input_file):
